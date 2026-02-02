@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,14 +49,14 @@ export default function Login() {
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 stat-gradient items-center justify-center p-12">
         <div className="max-w-md text-center text-primary-foreground">
-          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/20">
-            <BookOpen className="h-10 w-10" />
+          <div className="mx-auto mb-8 flex h-32 w-32 items-center justify-center rounded-2xl overflow-hidden">
+            <img src="/logo.jpg" alt="Universidade Mandume Ya Ndemufayo" className="h-full w-full object-cover" />
           </div>
           <h1 className="mb-4 font-display text-4xl font-bold">
             Revista Académica
           </h1>
           <p className="mb-2 text-xl font-medium opacity-90">
-            Universidade Mandume
+            Universidade Mandume Ya Ndemufayo
           </p>
           <p className="text-primary-foreground/70">
             Sistema de Detecção de Plágio com Inteligência Artificial
@@ -68,8 +68,8 @@ export default function Login() {
       <div className="flex w-full items-center justify-center p-8 lg:w-1/2">
         <Card className="w-full max-w-md border-0 shadow-academic-lg">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary lg:hidden">
-              <BookOpen className="h-6 w-6 text-primary-foreground" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl overflow-hidden lg:hidden">
+              <img src="/logo.jpg" alt="Universidade Mandume Ya Ndemufayo" className="h-full w-full object-cover" />
             </div>
             <CardTitle className="font-display text-2xl">Iniciar Sessão</CardTitle>
             <CardDescription>
