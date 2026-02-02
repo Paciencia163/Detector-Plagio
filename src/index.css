@@ -1,0 +1,216 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+  Design System - Universidade Mandume Ya Ndemufayo
+  Academic Plagiarism Detection Platform
+  
+  Colors: Blue institutional palette with academic elegance
+  - Primary: Deep navy blue (institutional, scholarly)
+  - Accent: Golden amber (excellence, prestige)
+  - Neutral: Cool grays (professional, readable)
+  - Risk levels: Green, Amber, Red
+*/
+
+@layer base {
+  :root {
+    /* Core backgrounds */
+    --background: 210 25% 98%;
+    --foreground: 215 25% 12%;
+
+    /* Card surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 12%;
+
+    /* Popover/Dropdown */
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 12%;
+
+    /* Primary: Deep Navy Blue */
+    --primary: 215 70% 28%;
+    --primary-foreground: 210 25% 98%;
+
+    /* Secondary: Cool neutral */
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 215 25% 20%;
+
+    /* Muted surfaces */
+    --muted: 210 15% 96%;
+    --muted-foreground: 215 10% 45%;
+
+    /* Accent: Golden Amber */
+    --accent: 38 85% 50%;
+    --accent-foreground: 215 25% 10%;
+
+    /* Destructive/High Risk */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 215 70% 28%;
+
+    --radius: 0.625rem;
+
+    /* Risk level colors */
+    --risk-low: 142 71% 45%;
+    --risk-low-foreground: 0 0% 100%;
+    --risk-medium: 38 92% 50%;
+    --risk-medium-foreground: 215 25% 10%;
+    --risk-high: 0 72% 51%;
+    --risk-high-foreground: 0 0% 100%;
+
+    /* Similarity highlight */
+    --highlight: 48 96% 89%;
+    --highlight-strong: 0 100% 90%;
+
+    /* Chart colors */
+    --chart-1: 215 70% 28%;
+    --chart-2: 38 85% 50%;
+    --chart-3: 142 71% 45%;
+    --chart-4: 0 72% 51%;
+    --chart-5: 200 80% 50%;
+
+    /* Sidebar - Deep Navy */
+    --sidebar-background: 215 50% 15%;
+    --sidebar-foreground: 210 25% 95%;
+    --sidebar-primary: 38 85% 55%;
+    --sidebar-primary-foreground: 215 25% 10%;
+    --sidebar-accent: 215 40% 22%;
+    --sidebar-accent-foreground: 210 25% 95%;
+    --sidebar-border: 215 35% 25%;
+    --sidebar-ring: 38 85% 55%;
+
+    /* Typography */
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+  }
+
+  .dark {
+    --background: 215 30% 8%;
+    --foreground: 210 25% 95%;
+
+    --card: 215 30% 10%;
+    --card-foreground: 210 25% 95%;
+
+    --popover: 215 30% 10%;
+    --popover-foreground: 210 25% 95%;
+
+    --primary: 200 80% 55%;
+    --primary-foreground: 215 30% 10%;
+
+    --secondary: 215 20% 18%;
+    --secondary-foreground: 210 25% 95%;
+
+    --muted: 215 20% 15%;
+    --muted-foreground: 210 15% 60%;
+
+    --accent: 38 85% 55%;
+    --accent-foreground: 215 25% 10%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 22%;
+    --input: 215 20% 22%;
+    --ring: 200 80% 55%;
+
+    --sidebar-background: 215 35% 6%;
+    --sidebar-foreground: 210 25% 95%;
+    --sidebar-primary: 38 85% 60%;
+    --sidebar-primary-foreground: 215 25% 10%;
+    --sidebar-accent: 215 30% 12%;
+    --sidebar-accent-foreground: 210 25% 95%;
+    --sidebar-border: 215 25% 18%;
+    --sidebar-ring: 38 85% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: var(--font-sans);
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* Risk badges */
+  .risk-low {
+    @apply bg-[hsl(var(--risk-low))] text-[hsl(var(--risk-low-foreground))];
+  }
+
+  .risk-medium {
+    @apply bg-[hsl(var(--risk-medium))] text-[hsl(var(--risk-medium-foreground))];
+  }
+
+  .risk-high {
+    @apply bg-[hsl(var(--risk-high))] text-[hsl(var(--risk-high-foreground))];
+  }
+
+  /* Highlight for plagiarism detection */
+  .highlight-match {
+    @apply bg-[hsl(var(--highlight))] px-0.5 rounded;
+  }
+
+  .highlight-match-strong {
+    @apply bg-[hsl(var(--highlight-strong))] px-0.5 rounded;
+  }
+
+  /* Academic card style */
+  .academic-card {
+    @apply bg-card rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  /* Stat card gradient - Blue */
+  .stat-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 60% 38%) 100%);
+  }
+
+  .gold-gradient {
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(45 90% 55%) 100%);
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    @apply border-2 border-dashed border-border rounded-xl p-8 text-center transition-all duration-200;
+  }
+
+  .upload-zone:hover,
+  .upload-zone-active {
+    @apply border-primary bg-primary/5;
+  }
+
+  /* Progress ring animation */
+  @keyframes progress-ring {
+    from {
+      stroke-dashoffset: 251.2;
+    }
+  }
+
+  .animate-progress-ring {
+    animation: progress-ring 1.5s ease-out forwards;
+  }
+}
