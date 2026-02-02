@@ -2,19 +2,26 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// https://vitejs.dev/config/
+// Configuração final para Vite + React (produção no Vercel)
 export default defineConfig({
-  server: {
-    host: "::",
-    port: 8080,
-    hmr: {
-      overlay: false,
-    },
-  },
-  plugins: [react()],
+  // Base correta para Vercel (SPA)
+  base: "/",
+
+  // Plugins
+  plugins: [
+    react(),
+  ],
+
+  // Resolução de caminhos (alias @/)
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+
+  // Build otimizado
+  build: {
+    outDir: "dist",
+    sourcemap: false,
   },
 });
