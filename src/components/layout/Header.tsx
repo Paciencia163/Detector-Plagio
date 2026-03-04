@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { Bell, Search, LogOut, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 interface HeaderProps {
   title?: string;
   subtitle?: string;
+  children?: ReactNode;
 }
 
 const roleLabels = {
@@ -25,7 +27,7 @@ const roleLabels = {
   avaliador: "Avaliador",
 };
 
-export function Header({ title, subtitle }: HeaderProps) {
+export function Header({ title, subtitle, children }: HeaderProps) {
   const { profile, role, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -44,15 +46,18 @@ export function Header({ title, subtitle }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
-      <div className="flex flex-col">
-        {title && <h1 className="text-xl font-display font-semibold text-foreground">{title}</h1>}
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+    <header className="sticky top-0 z-10 flex items-center justify-between h-14 md:h-16 px-4 md:px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
+      <div className="flex items-center min-w-0">
+        {children}
+        <div className="flex flex-col min-w-0">
+          {title && <h1 className="text-base md:text-xl font-display font-semibold text-foreground truncate">{title}</h1>}
+          {subtitle && <p className="text-xs md:text-sm text-muted-foreground truncate hidden sm:block">{subtitle}</p>}
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Search */}
-        <div className="relative hidden md:block">
+      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+        {/* Search - hidden on mobile */}
+        <div className="relative hidden lg:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Pesquisar análises..."
@@ -61,9 +66,9 @@ export function Header({ title, subtitle }: HeaderProps) {
         </div>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+        <Button variant="ghost" size="icon" className="relative h-9 w-9">
+          <Bell className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+          <Badge className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 flex items-center justify-center p-0 text-[10px] md:text-xs">
             3
           </Badge>
         </Button>
@@ -71,9 +76,9 @@ export function Header({ title, subtitle }: HeaderProps) {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 pl-2 pr-3">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+            <Button variant="ghost" className="flex items-center gap-2 pl-1 pr-2 md:pl-2 md:pr-3 h-9 md:h-10">
+              <Avatar className="h-7 w-7 md:h-8 md:w-8">
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs md:text-sm font-medium">
                   {getInitials(profile?.full_name)}
                 </AvatarFallback>
               </Avatar>

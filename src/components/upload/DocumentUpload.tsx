@@ -97,45 +97,36 @@ export function DocumentUpload() {
     }
 
     try {
-      // Update progress to show upload starting
       setFiles((prev) =>
         prev.map((f) =>
           f.id === uploadedFile.id ? { ...f, progress: 10 } : f
         )
       );
 
-      // Generate unique file path: userId/timestamp-filename
-      const fileExt = uploadedFile.file.name.split('.').pop();
       const fileName = `${Date.now()}-${uploadedFile.file.name}`;
       const filePath = `${user.id}/${fileName}`;
 
-      // Update progress
       setFiles((prev) =>
         prev.map((f) =>
           f.id === uploadedFile.id ? { ...f, progress: 30 } : f
         )
       );
 
-      // Upload to Supabase Storage
       const { data, error } = await supabase.storage
-        .from('documents')
+        .from("documents")
         .upload(filePath, uploadedFile.file, {
-          cacheControl: '3600',
+          cacheControl: "3600",
           upsert: false,
         });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Update progress
       setFiles((prev) =>
         prev.map((f) =>
           f.id === uploadedFile.id ? { ...f, progress: 80 } : f
         )
       );
 
-      // Mark as ready
       setFiles((prev) =>
         prev.map((f) =>
           f.id === uploadedFile.id
@@ -149,7 +140,7 @@ export function DocumentUpload() {
         description: `O ficheiro "${uploadedFile.file.name}" foi carregado com sucesso.`,
       });
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       setFiles((prev) =>
         prev.map((f) =>
           f.id === uploadedFile.id ? { ...f, status: "error" } : f
@@ -189,41 +180,96 @@ export function DocumentUpload() {
 
   const removeFile = async (id: string) => {
     const fileToRemove = files.find((f) => f.id === id);
-    
-    // If file was uploaded to storage, delete it
+
     if (fileToRemove?.storagePath) {
       try {
-        await supabase.storage
-          .from('documents')
-          .remove([fileToRemove.storagePath]);
+        await supabase.storage.from("documents").remove([fileToRemove.storagePath]);
       } catch (error) {
-        console.error('Error removing file from storage:', error);
+        console.error("Error removing file from storage:", error);
       }
     }
-    
+
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
   const handleAnalyze = async () => {
     if (files.length === 0 || files.some((f) => f.status !== "ready")) return;
+    if (!user) return;
 
     setIsAnalyzing(true);
 
-    // Simulate analysis
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    try {
+      // Create analysis records in the database for each file
+      const readyFiles = files.filter((f) => f.status === "ready" && f.storagePath);
 
-    toast({
-      title: "Análise concluída",
-      description: "O relatório de plágio está pronto para visualização.",
-    });
+      for (const uploadedFile of readyFiles) {
+        // Insert analysis record
+        const { data: analysis, error: insertError } = await supabase
+          .from("analyses")
+          .insert({
+            user_id: user.id,
+            title: metadata.title || uploadedFile.file.name,
+            author: metadata.author || null,
+            notes: metadata.notes || null,
+            file_name: uploadedFile.file.name,
+            file_path: uploadedFile.storagePath!,
+            file_size: uploadedFile.file.size,
+            file_type: uploadedFile.file.type,
+            status: "pending",
+          })
+          .select()
+          .single();
 
-    navigate("/report/demo");
+        if (insertError) {
+          console.error("Error creating analysis:", insertError);
+          toast({
+            title: "Erro ao criar análise",
+            description: insertError.message,
+            variant: "destructive",
+          });
+          continue;
+        }
+
+        // Trigger AI analysis
+        const { data: result, error: fnError } = await supabase.functions.invoke(
+          "analyze-document",
+          { body: { analysisId: analysis.id } }
+        );
+
+        if (fnError) {
+          console.error("Error invoking analysis:", fnError);
+          toast({
+            title: "Erro na análise",
+            description: "Não foi possível iniciar a análise de IA.",
+            variant: "destructive",
+          });
+          continue;
+        }
+
+        toast({
+          title: "Análise concluída",
+          description: "O relatório de plágio está pronto para visualização.",
+        });
+
+        navigate(`/report/${analysis.id}`);
+        return;
+      }
+    } catch (error: any) {
+      console.error("Analysis error:", error);
+      toast({
+        title: "Erro na análise",
+        description: error.message || "Ocorreu um erro durante a análise.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const allFilesReady = files.length > 0 && files.every((f) => f.status === "ready");
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-6 md:space-y-8">
       {/* Upload Zone */}
       <div
         onDragOver={handleDragOver}
@@ -244,15 +290,15 @@ export function DocumentUpload() {
           className="hidden"
         />
 
-        <div className="flex flex-col items-center gap-4">
-          <div className="p-4 rounded-full bg-primary/10">
-            <Upload className="h-8 w-8 text-primary" />
+        <div className="flex flex-col items-center gap-3 md:gap-4">
+          <div className="p-3 md:p-4 rounded-full bg-primary/10">
+            <Upload className="h-6 w-6 md:h-8 md:w-8 text-primary" />
           </div>
           <div>
-            <p className="text-lg font-medium text-foreground">
+            <p className="text-base md:text-lg font-medium text-foreground">
               Arraste ficheiros ou clique para selecionar
             </p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
               Suporta PDF, DOCX e TXT (máx. 10MB por ficheiro)
             </p>
           </div>
@@ -267,23 +313,23 @@ export function DocumentUpload() {
             {files.map((uploadedFile) => (
               <div
                 key={uploadedFile.id}
-                className="flex items-center gap-4 p-4 rounded-lg border border-border bg-card"
+                className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-lg border border-border bg-card"
               >
-                <div className="p-2 rounded-lg bg-secondary">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
+                <div className="p-2 rounded-lg bg-secondary flex-shrink-0">
+                  <FileText className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground truncate">
+                    <p className="font-medium text-foreground truncate text-sm md:text-base">
                       {uploadedFile.file.name}
                     </p>
-                    <span className="text-xs px-2 py-0.5 rounded bg-secondary text-muted-foreground">
+                    <span className="text-xs px-2 py-0.5 rounded bg-secondary text-muted-foreground flex-shrink-0">
                       {FILE_TYPE_LABELS[uploadedFile.file.type]}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs md:text-sm text-muted-foreground">
                       {(uploadedFile.file.size / 1024).toFixed(1)} KB
                     </span>
                     {uploadedFile.status === "uploading" && (
@@ -292,20 +338,20 @@ export function DocumentUpload() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                   {uploadedFile.status === "uploading" && (
-                    <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                    <Loader2 className="h-4 w-4 md:h-5 md:w-5 text-primary animate-spin" />
                   )}
                   {uploadedFile.status === "ready" && (
-                    <CheckCircle className="h-5 w-5 text-risk-low" />
+                    <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-risk-low" />
                   )}
                   {uploadedFile.status === "error" && (
-                    <AlertCircle className="h-5 w-5 text-destructive" />
+                    <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-destructive" />
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7 md:h-8 md:w-8"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeFile(uploadedFile.id);
@@ -322,10 +368,10 @@ export function DocumentUpload() {
 
       {/* Metadata Form */}
       {files.length > 0 && (
-        <div className="space-y-4 p-6 rounded-xl border border-border bg-card">
-          <h3 className="font-display font-semibold text-lg">Informações do Documento</h3>
+        <div className="space-y-4 p-4 md:p-6 rounded-xl border border-border bg-card">
+          <h3 className="font-display font-semibold text-base md:text-lg">Informações do Documento</h3>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="title">Título do trabalho</Label>
               <Input
@@ -360,8 +406,8 @@ export function DocumentUpload() {
       )}
 
       {/* Submit Button */}
-      <div className="flex items-center justify-between pt-4">
-        <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4">
+        <p className="text-xs md:text-sm text-muted-foreground">
           <AlertCircle className="inline-block h-4 w-4 mr-1" />
           Este sistema é uma ferramenta de apoio e não substitui a avaliação humana.
         </p>
@@ -369,12 +415,12 @@ export function DocumentUpload() {
           size="lg"
           disabled={!allFilesReady || isAnalyzing}
           onClick={handleAnalyze}
-          className="min-w-40"
+          className="min-w-40 w-full sm:w-auto"
         >
           {isAnalyzing ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              A analisar...
+              A analisar com IA...
             </>
           ) : (
             "Iniciar Análise"

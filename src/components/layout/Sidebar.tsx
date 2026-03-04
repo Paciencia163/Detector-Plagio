@@ -26,28 +26,28 @@ import { useNavigate } from "react-router-dom";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: Upload, label: "Nova Análise", path: "/upload" },
-  { icon: FileSearch, label: "Relatórios", path: "/reports" },
   { icon: History, label: "Histórico", path: "/history" },
 ];
 
 const adminItems = [
   { icon: Users, label: "Utilizadores", path: "/users" },
-  { icon: Settings, label: "Configurações", path: "/settings" },
-];
-
-const bottomItems = [
-  { icon: HelpCircle, label: "Ajuda", path: "/help" },
 ];
 
 interface SidebarProps {
   className?: string;
+  onNavigate?: () => void;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, onNavigate }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   const NavItem = ({
     icon: Icon,
@@ -63,6 +63,7 @@ export function Sidebar({ className }: SidebarProps) {
     const content = (
       <Link
         to={path}
+        onClick={onNavigate}
         className={cn(
           "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
           "hover:bg-sidebar-accent",
@@ -102,7 +103,7 @@ export function Sidebar({ className }: SidebarProps) {
     >
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-sidebar-border">
-        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-sidebar-primary">
+        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-sidebar-primary flex-shrink-0">
           <BookOpen className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
         {!collapsed && (
@@ -125,7 +126,7 @@ export function Sidebar({ className }: SidebarProps) {
           ))}
         </div>
 
-        {/* Admin Section - Only visible to admins */}
+        {/* Admin Section */}
         {isAdmin && (
           <div className="pt-4 mt-4 border-t border-sidebar-border">
             {!collapsed && (
@@ -144,15 +145,23 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* Bottom Section */}
       <div className="p-3 border-t border-sidebar-border space-y-1">
-        {bottomItems.map((item) => (
-          <NavItem key={item.path} {...item} />
-        ))}
-        
+        {/* Logout */}
+        <button
+          onClick={() => {
+            handleSignOut();
+            onNavigate?.();
+          }}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent w-full text-left text-sidebar-foreground/70 hover:text-sidebar-foreground"
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {!collapsed && <span className="font-medium">Terminar Sessão</span>}
+        </button>
+
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full justify-center text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+          className="w-full justify-center text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent hidden md:flex"
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />
