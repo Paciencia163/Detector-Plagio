@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      analyses: {
+        Row: {
+          ai_report: Json | null
+          author: string | null
+          citations_percentage: number | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          matched_sources: Json | null
+          notes: string | null
+          original_percentage: number | null
+          risk_level: string | null
+          similarity_percentage: number | null
+          status: string
+          suspicious_percentage: number | null
+          title: string
+          updated_at: string
+          user_id: string
+          word_count: number | null
+        }
+        Insert: {
+          ai_report?: Json | null
+          author?: string | null
+          citations_percentage?: number | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number
+          file_type: string
+          id?: string
+          matched_sources?: Json | null
+          notes?: string | null
+          original_percentage?: number | null
+          risk_level?: string | null
+          similarity_percentage?: number | null
+          status?: string
+          suspicious_percentage?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+          word_count?: number | null
+        }
+        Update: {
+          ai_report?: Json | null
+          author?: string | null
+          citations_percentage?: number | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          matched_sources?: Json | null
+          notes?: string | null
+          original_percentage?: number | null
+          risk_level?: string | null
+          similarity_percentage?: number | null
+          status?: string
+          suspicious_percentage?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          word_count?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
