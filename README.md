@@ -71,7 +71,7 @@ npm run test
 - Envie PRs com descrições claras e testes quando aplicável
 
 ## Licença
-Verifique o arquivo `LICENSE` no repositório. Se não existir, sugerimos usar MIT.
+Este projeto está licenciado sob a MIT License — consulte o arquivo `LICENSE` na raiz do repositório.
 
 ## Contato
 Para dúvidas ou ajuda, abra uma issue ou entre em contato com os mantenedores do projeto. paciencia163@gmail.com
