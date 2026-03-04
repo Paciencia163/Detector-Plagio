@@ -1,61 +1,77 @@
-# Academic Integrity Shield
+# Detector de Plágio UMN
 
-Sistema de Detecção de Plágio com Inteligência Artificial - Universidade Mandume Ya Ndemufayo
+Projeto: Detector de Plágio UMN — uma aplicação web para análise de similaridade e detecção de plágio em documentos acadêmicos.
 
-## Como editar este código?
+## Sobre
+Detector de Plágio UMN é uma interface front-end construída com React + TypeScript (Vite), estilizada com TailwindCSS e integrada ao Supabase para autenticação e backend leve. Fornece upload de documentos, análises de similaridade, relatórios detalhados e histórico de análises.
 
-### Usar o seu IDE preferido
+## Stack
+- Frontend: React, TypeScript, Vite
+- Estilos: Tailwind CSS
+- Autenticação / Backend: Supabase (funções & migrations incluidas)
+- Testes: Vitest
 
-Se pretende trabalhar localmente usando o seu próprio IDE, pode clonar este repositório e enviar mudanças.
+## Principais recursos
+- Upload de documentos e processamento de similaridade
+- Relatórios com fontes encontradas e métricas de risco
+- Painel de controle (dashboard) com estatísticas e histórico
+- Controle de usuários e papéis via Supabase
 
-O único requisito é ter Node.js e npm instalados - [instalar com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Requisitos
+- Node.js (v18+ recomendado)
+- npm ou pnpm
+- Conta e projeto no Supabase (para chaves/env)
 
-Siga estes passos:
+## Configuração rápida
+1. Instale dependências:
 
-```sh
-# Passo 1: Clone o repositório usando o URL Git do projeto.
-git clone <YOUR_GIT_URL>
+```bash
+npm install
+# ou
+pnpm install
+```
 
-# Passo 2: Navegue até o diretório do projeto.
-cd academic-integrity-shield
+2. Crie um arquivo `.env` na raiz com as variáveis necessárias (exemplo):
 
-# Passo 3: Instale as dependências necessárias.
-npm i
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-# Passo 4: Inicie o servidor de desenvolvimento com recarregamento automático.
+3. Rodar em desenvolvimento:
+
+```bash
 npm run dev
 ```
 
-### Editar um arquivo diretamente no GitHub
+4. Build para produção:
 
-- Navegue até o(s) arquivo(s) desejado(s).
-- Clique no botão "Edit" (ícone de lápis) no canto superior direito da visualização do arquivo.
-- Faça suas alterações e confirme as alterações.
+```bash
+npm run build
+npm run preview
+```
 
-### Usar GitHub Codespaces
+## Banco de dados e funções
+O diretório `supabase/` contém migrations SQL e funções server-side usadas pelo projeto. Ao configurar o Supabase, aplique as migrations e implemente as funções conforme necessário.
 
-- Navegue até a página principal do seu repositório.
-- Clique no botão "Code" (botão verde) perto do canto superior direito.
-- Selecione a aba "Codespaces".
-- Clique em "New codespace" para lançar um novo ambiente Codespace.
-- Edite arquivos diretamente no Codespace e confirme e envie suas alterações quando terminar.
+## Estrutura do projeto (resumo)
+- `src/` — código fonte React (páginas, componentes, integrações)
+- `supabase/` — migrations, funções e configurações do Supabase
+- `public/` — ativos públicos
 
-## Quais tecnologias são usadas neste projeto?
+## Testes
+Execute os testes com:
 
-Este projeto é construído com:
+```bash
+npm run test
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Supabase
+## Contribuição
+- Abra issues para bugs ou novos recursos
+- Envie PRs com descrições claras e testes quando aplicável
 
-## Como fazer deploy deste projeto?
+## Licença
+Verifique o arquivo `LICENSE` no repositório. Se não existir, sugerimos usar MIT.
 
-Para fazer deploy do projeto, pode usar serviços como:
-
-- Vercel
-- Netlify
-- GitHub Pages
-- Qualquer outro serviço de hospedagem que suporte aplicações React/Vite
+## Contato
+Para dúvidas ou ajuda, abra uma issue ou entre em contato com os mantenedores do projeto. paciencia163@gmail.com
