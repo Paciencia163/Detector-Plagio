@@ -1,17 +1,91 @@
-import { FileSearch, FileText, TrendingUp, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FileSearch, FileText, TrendingUp, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentAnalyses } from "@/components/dashboard/RecentAnalyses";
 import { RiskDistribution } from "@/components/dashboard/RiskDistribution";
+import { MonthlyChart } from "@/components/dashboard/MonthlyChart";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
+
+interface DashboardStats {
+  totalAnalyses: number;
+  thisMonthAnalyses: number;
+  avgOriginality: number;
+  highRiskCount: number;
+  riskDistribution: { low: number; medium: number; high: number };
+}
 
 export default function Dashboard() {
+  const { user, isAdmin } = useAuth();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [allAnalyses, setAllAnalyses] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchStats = async () => {
+      // Fetch all analyses for the user (or all if admin)
+      let query = supabase.from("analyses").select("*");
+      if (!isAdmin) {
+        query = query.eq("user_id", user.id);
+      }
+      const { data: analyses } = await query;
+
+      if (!analyses) {
+        setIsLoading(false);
+        return;
+      }
+      setAllAnalyses(analyses);
+
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+      const thisMonth = analyses.filter((a) => a.created_at >= startOfMonth);
+      const completed = analyses.filter((a) => a.status === "completed");
+
+      const avgOrig = completed.length > 0
+        ? Math.round(completed.reduce((sum, a) => sum + (Number(a.original_percentage) || 0), 0) / completed.length)
+        : 0;
+
+      const low = completed.filter((a) => a.risk_level === "low").length;
+      const medium = completed.filter((a) => a.risk_level === "medium").length;
+      const high = completed.filter((a) => a.risk_level === "high").length;
+      const total = low + medium + high || 1;
+
+      setStats({
+        totalAnalyses: analyses.length,
+        thisMonthAnalyses: thisMonth.length,
+        avgOriginality: avgOrig,
+        highRiskCount: high,
+        riskDistribution: {
+          low: Math.round((low / total) * 100),
+          medium: Math.round((medium / total) * 100),
+          high: Math.round((high / total) * 100),
+        },
+      });
+      setIsLoading(false);
+    };
+
+    fetchStats();
+  }, [user, isAdmin]);
+
+  if (isLoading) {
+    return (
+      <MainLayout title="Dashboard">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
-    <MainLayout
-      title="Dashboard"
-      subtitle="Visão geral do sistema de detecção de plágio"
-    >
+    <MainLayout title="Dashboard" subtitle="Visão geral do sistema de detecção de plágio">
       <div className="space-y-8 animate-fade-in">
         {/* Welcome Banner */}
         <div className="relative overflow-hidden rounded-xl stat-gradient p-6 md:p-8 text-primary-foreground">
@@ -42,30 +116,31 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Análises Este Mês"
-            value={156}
+            value={stats?.thisMonthAnalyses ?? 0}
             icon={FileSearch}
-            trend={{ value: 12, label: "vs mês anterior" }}
           />
           <StatCard
-            title="Documentos Processados"
-            value="2.4K"
+            title="Total de Análises"
+            value={stats?.totalAnalyses ?? 0}
             icon={FileText}
-            subtitle="Total histórico"
+            subtitle="Histórico completo"
           />
           <StatCard
             title="Taxa de Originalidade"
-            value="87%"
+            value={`${stats?.avgOriginality ?? 0}%`}
             icon={TrendingUp}
             variant="primary"
-            trend={{ value: 3, label: "vs mês anterior" }}
           />
           <StatCard
-            title="Utilizadores Activos"
-            value={42}
-            icon={Users}
-            subtitle="Editores e avaliadores"
+            title="Alto Risco"
+            value={stats?.highRiskCount ?? 0}
+            icon={AlertTriangle}
+            subtitle="Documentos com alto risco"
           />
         </div>
+
+        {/* Monthly Chart */}
+        <MonthlyChart analyses={allAnalyses} />
 
         {/* Main Content */}
         <div className="grid gap-6 lg:grid-cols-3">
@@ -73,7 +148,7 @@ export default function Dashboard() {
             <RecentAnalyses />
           </div>
           <div>
-            <RiskDistribution />
+            <RiskDistribution distribution={stats?.riskDistribution} />
           </div>
         </div>
 

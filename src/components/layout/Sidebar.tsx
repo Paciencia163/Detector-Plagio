@@ -27,6 +27,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: Upload, label: "Nova Análise", path: "/upload" },
   { icon: History, label: "Histórico", path: "/history" },
+  { icon: Settings, label: "Meu Perfil", path: "/profile" },
 ];
 
 const adminItems = [

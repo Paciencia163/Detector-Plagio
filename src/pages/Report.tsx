@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Download, MessageSquare, Printer, Loader2 } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { ArrowLeft, Download, MessageSquare, Printer, Loader2, Check } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +10,7 @@ import { SimilarityGauge } from "@/components/report/SimilarityGauge";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { MatchedSource } from "@/components/report/MatchedSource";
 import { supabase } from "@/integrations/supabase/client";
+import { exportReportPdf } from "@/utils/exportPdf";
 
 interface AnalysisData {
   id: string;
@@ -25,6 +26,7 @@ interface AnalysisData {
   word_count: number;
   matched_sources: any[];
   ai_report: any;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -33,6 +35,8 @@ export default function Report() {
   const { id } = useParams();
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [notes, setNotes] = useState("");
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -46,6 +50,7 @@ export default function Report() {
 
       if (!error && data) {
         setAnalysis(data as any);
+        setNotes((data as any).notes || "");
       }
       setIsLoading(false);
     };
@@ -67,6 +72,18 @@ export default function Report() {
     };
   }, [id]);
 
+  const handleSaveNotes = useCallback(async () => {
+    if (!id) return;
+    setIsSavingNotes(true);
+    const { error } = await supabase
+      .from("analyses")
+      .update({ notes })
+      .eq("id", id);
+    setIsSavingNotes(false);
+    if (!error && analysis) {
+      setAnalysis({ ...analysis, notes } as any);
+    }
+  }, [id, notes, analysis]);
   if (isLoading) {
     return (
       <MainLayout title="Relatório de Análise">
@@ -106,6 +123,7 @@ export default function Report() {
     id: String(i + 1),
     title: s.title,
     type: s.type || "external",
+    url: s.url || undefined,
     similarity: s.similarity,
     matchedText: s.matched_text,
     originalText: s.original_text,
@@ -141,11 +159,25 @@ export default function Report() {
           </Button>
 
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button variant="outline" className="flex-1 sm:flex-initial">
+            <Button variant="outline" className="flex-1 sm:flex-initial" onClick={() => window.print()}>
               <Printer className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">Imprimir</span>
             </Button>
-            <Button className="flex-1 sm:flex-initial">
+            <Button className="flex-1 sm:flex-initial" onClick={() => exportReportPdf({
+              title: analysis.title,
+              author: analysis.author || "Não especificado",
+              createdAt: analysis.created_at,
+              updatedAt: analysis.updated_at,
+              wordCount: analysis.word_count,
+              similarityPercentage: Number(analysis.similarity_percentage),
+              originalPercentage: Number(analysis.original_percentage),
+              citationsPercentage: Number(analysis.citations_percentage),
+              suspiciousPercentage: Number(analysis.suspicious_percentage),
+              riskLevel: analysis.risk_level,
+              matchedSources: analysis.matched_sources || [],
+              recommendations: analysis.ai_report?.recommendations || [],
+              summary: analysis.ai_report?.summary || "",
+            })}>
               <Download className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">Exportar PDF</span>
             </Button>
@@ -232,19 +264,27 @@ export default function Report() {
                 Observações do Avaliador
               </h2>
 
-              <div className="space-y-4">
+                <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="evaluator-notes">Adicionar observação</Label>
                   <Textarea
                     id="evaluator-notes"
                     placeholder="Insira as suas observações sobre esta análise..."
                     rows={5}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
                   />
                 </div>
 
-                <Button>
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Guardar Observação
+                <Button onClick={handleSaveNotes} disabled={isSavingNotes}>
+                  {isSavingNotes ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : notes === (analysis?.notes || "") ? (
+                    <Check className="mr-2 h-4 w-4" />
+                  ) : (
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                  )}
+                  {isSavingNotes ? "A guardar..." : "Guardar Observação"}
                 </Button>
               </div>
             </div>
